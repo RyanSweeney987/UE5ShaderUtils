@@ -11,101 +11,101 @@ namespace ComputePassBase
 }
 
 /**
- * 
+ *
  */
-struct COMMONRENDER_API FComputePassInputParams
+struct UE5SHADERUTILS_API FComputePassInputParams
 {
-	FRDGBuilder& GraphBuilder;
-	const FGlobalShaderMap* GlobalShaderMap;
+	FRDGBuilder &GraphBuilder;
+	const FGlobalShaderMap *GlobalShaderMap;
 	FIntPoint ThreadCount;
 
-	FComputePassInputParams(FRDGBuilder& InGraphBuilder, const FGlobalShaderMap* InGlobalShaderMap, FIntPoint InThreadCount)
-		: GraphBuilder(InGraphBuilder)
-		, GlobalShaderMap(InGlobalShaderMap)
-		, ThreadCount(InThreadCount)
-	{}
+	FComputePassInputParams(FRDGBuilder &InGraphBuilder, const FGlobalShaderMap *InGlobalShaderMap, FIntPoint InThreadCount)
+		: GraphBuilder(InGraphBuilder), GlobalShaderMap(InGlobalShaderMap), ThreadCount(InThreadCount)
+	{
+	}
 };
 
 /**
- * 
+ *
  */
-struct COMMONRENDER_API FComputePassOutputParams
+struct UE5SHADERUTILS_API FComputePassOutputParams
 {
 	FRDGTextureRef Texture;
-	
+
 	FComputePassOutputParams(const FRDGTextureRef InTexture = nullptr)
 		: Texture(InTexture)
-	{}
+	{
+	}
 };
 
 /**
- * 
+ *
  */
-class COMMONRENDER_API FComputePassBase
+class UE5SHADERUTILS_API FComputePassBase
 {
 public:
 	bool bNeverCull = false;
 	bool bAsyncCompute = false;
-	
+
 public:
 	FComputePassBase() = default;
 	virtual ~FComputePassBase() = default;
 
-	virtual FComputePassOutputParams AddPass(FComputePassInputParams& InputParams) = 0;
+	virtual FComputePassOutputParams AddPass(FComputePassInputParams &InputParams) = 0;
 
 protected:
-	template<typename TShaderClass>
-    void AddComputePass(FRDGBuilder& GraphBuilder,
-		const FGlobalShaderMap* GlobalShaderMap,
-		FRDGEventName&& PassName,
-		typename TShaderClass::FParameters* Parameters,
-		const FIntVector& GroupCount)
+	template <typename TShaderClass>
+	void AddComputePass(FRDGBuilder &GraphBuilder,
+						const FGlobalShaderMap *GlobalShaderMap,
+						FRDGEventName &&PassName,
+						typename TShaderClass::FParameters *Parameters,
+						const FIntVector &GroupCount)
 	{
 		ERDGPassFlags PassFlags = (bNeverCull ? ERDGPassFlags::NeverCull : ERDGPassFlags::None);
 		PassFlags |= bAsyncCompute ? ERDGPassFlags::AsyncCompute : ERDGPassFlags::Compute;
-		
-		const FShaderParametersMetadata* ParametersMetadata = TShaderClass::FParameters::FTypeInfo::GetStructMetadata();
+
+		const FShaderParametersMetadata *ParametersMetadata = TShaderClass::FParameters::FTypeInfo::GetStructMetadata();
 		const TShaderRef<TShaderClass> ComputeShader = TShaderMapRef<TShaderClass>(GlobalShaderMap);
-		
+
 		checkf(ComputeShader.IsValid(), TEXT("Invalid compute shader"));
-		
+
 		ClearUnusedGraphResources(ComputeShader, Parameters);
-		
+
 		GraphBuilder.AddPass(
 			Forward<FRDGEventName>(PassName),
 			Parameters,
 			PassFlags,
-			[Parameters, ComputeShader, ParametersMetadata, GroupCount](FRHIComputeCommandList& RHICmdList)
-		{
-			ensure(GroupCount.X <= GRHIMaxDispatchThreadGroupsPerDimension.X);
-			ensure(GroupCount.Y <= GRHIMaxDispatchThreadGroupsPerDimension.Y);
-			ensure(GroupCount.Z <= GRHIMaxDispatchThreadGroupsPerDimension.Z);
-				
-			FComputeShaderUtils::Dispatch(RHICmdList, ComputeShader, ParametersMetadata, *Parameters, GroupCount);
-		});
+			[Parameters, ComputeShader, ParametersMetadata, GroupCount](FRHIComputeCommandList &RHICmdList)
+			{
+				ensure(GroupCount.X <= GRHIMaxDispatchThreadGroupsPerDimension.X);
+				ensure(GroupCount.Y <= GRHIMaxDispatchThreadGroupsPerDimension.Y);
+				ensure(GroupCount.Z <= GRHIMaxDispatchThreadGroupsPerDimension.Z);
+
+				FComputeShaderUtils::Dispatch(RHICmdList, ComputeShader, ParametersMetadata, *Parameters, GroupCount);
+			});
 	}
 
-	template<typename TShaderClass>
-	void AddIndirectComputePass(FRDGBuilder& GraphBuilder,
-		const FGlobalShaderMap* GlobalShaderMap,
-		FRDGEventName&& PassName,
-		typename TShaderClass::FParameters* Parameters,
-		FRDGBufferRef IndirectArgsBuffer,
-		uint32 IndirectArgsOffset)
+	template <typename TShaderClass>
+	void AddIndirectComputePass(FRDGBuilder &GraphBuilder,
+								const FGlobalShaderMap *GlobalShaderMap,
+								FRDGEventName &&PassName,
+								typename TShaderClass::FParameters *Parameters,
+								FRDGBufferRef IndirectArgsBuffer,
+								uint32 IndirectArgsOffset)
 	{
 		ERDGPassFlags PassFlags = (bNeverCull ? ERDGPassFlags::NeverCull : ERDGPassFlags::None);
 		PassFlags |= bAsyncCompute ? ERDGPassFlags::AsyncCompute : ERDGPassFlags::Compute;
-		
+
 		const TShaderRef<TShaderClass> ComputeShader = TShaderMapRef<TShaderClass>(GlobalShaderMap);
 		checkf(ComputeShader.IsValid(), TEXT("Invalid compute shader"));
-		
+
 		GraphBuilder.AddPass(
 			Forward<FRDGEventName>(PassName),
 			Parameters,
 			PassFlags,
-			[Parameters, ComputeShader, IndirectArgsBuffer, IndirectArgsOffset](FRHIComputeCommandList& RHICmdList)
-		{
-			FComputeShaderUtils::DispatchIndirect(RHICmdList, ComputeShader, *Parameters, IndirectArgsBuffer, IndirectArgsOffset);
-		});
+			[Parameters, ComputeShader, IndirectArgsBuffer, IndirectArgsOffset](FRHIComputeCommandList &RHICmdList)
+			{
+				FComputeShaderUtils::DispatchIndirect(RHICmdList, ComputeShader, *Parameters, IndirectArgsBuffer, IndirectArgsOffset);
+			});
 	}
 };
