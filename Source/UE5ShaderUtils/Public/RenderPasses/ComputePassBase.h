@@ -17,10 +17,9 @@ struct UE5SHADERUTILS_API FComputePassInputParams
 {
 	FRDGBuilder &GraphBuilder;
 	const FGlobalShaderMap *GlobalShaderMap;
-	FIntPoint ThreadCount;
 
-	FComputePassInputParams(FRDGBuilder &InGraphBuilder, const FGlobalShaderMap *InGlobalShaderMap, FIntPoint InThreadCount)
-		: GraphBuilder(InGraphBuilder), GlobalShaderMap(InGlobalShaderMap), ThreadCount(InThreadCount)
+	FComputePassInputParams(FRDGBuilder &InGraphBuilder, const FGlobalShaderMap *InGlobalShaderMap)
+		: GraphBuilder(InGraphBuilder), GlobalShaderMap(InGlobalShaderMap)
 	{
 	}
 };

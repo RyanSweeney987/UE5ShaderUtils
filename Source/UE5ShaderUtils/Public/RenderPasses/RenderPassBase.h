@@ -3,8 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
-#include "CoreMinimal.h"
 #include "PixelShaderUtils.h"
 
 namespace RenderPassBase
