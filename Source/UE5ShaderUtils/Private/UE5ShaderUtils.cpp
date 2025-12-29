@@ -1,4 +1,4 @@
-﻿// Copyright Ryan Sweeney 2024, All Rights Reserved
+﻿// Copyright Ryan Sweeney 2025, All Rights Reserved
 
 #include "UE5ShaderUtils.h"
 

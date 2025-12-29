@@ -1,0 +1,20 @@
+// Copyright Ryan Sweeney 2025, All Rights Reserved
+
+#include "/Engine/Public/Platform.ush"
+
+Texture2D<float4> InputTexture;
+
+RWTexture2D<float4> OutputTexture;
+
+float4 ColourChangePS(float4 SvPosition : SV_POSITION) : SV_Target0
+{
+	const float4 InputColour = InputTexture.Load(int3(SvPosition.xy, 0));
+	return InputColour.zyxw;
+}
+
+[numthreads(8, 8, 1)]
+void ColourChangeCS(uint2 DispatchThreadId : SV_DispatchThreadID)
+{
+	const float4 InputColour = InputTexture.Load(int3(DispatchThreadId.xy, 0));
+	OutputTexture[DispatchThreadId.xy] = InputColour.zyxw;
+}

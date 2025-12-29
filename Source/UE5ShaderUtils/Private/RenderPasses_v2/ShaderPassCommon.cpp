@@ -1,6 +1,4 @@
-﻿/************************************************************
- *   Copyright (C) Ryan Sweeney 2025, All Rights Reserved   *
- ************************************************************/
+﻿// Copyright Ryan Sweeney 2025, All Rights Reserved
 
 
 #include "RenderPasses_v2/ShaderPassCommon.h"

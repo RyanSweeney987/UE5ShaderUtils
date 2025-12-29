@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Copyright Ryan Sweeney 2025, All Rights Reserved
 
 
 #include "ExampleSceneViewExtension.h"
