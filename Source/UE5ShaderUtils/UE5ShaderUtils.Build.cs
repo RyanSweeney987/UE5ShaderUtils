@@ -1,5 +1,6 @@
 ﻿// Copyright Ryan Sweeney 2024, All Rights Reserved
 
+using System.IO;
 using UnrealBuildTool;
 
 public class UE5ShaderUtils : ModuleRules
@@ -11,6 +12,8 @@ public class UE5ShaderUtils : ModuleRules
 		PublicIncludePaths.AddRange(
 			new string[] {
 				// ... add public include paths required here ...
+				// ... add public include paths required here ...
+				Path.Combine(GetModuleDirectory("Renderer"), "Private"),
 			}
 			);
 				
@@ -25,8 +28,11 @@ public class UE5ShaderUtils : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core",
+				"Core", 
+				"Engine",
 				// ... add other public dependencies that you statically link with here ...
+				"RenderCore", 
+				"Renderer"
 			}
 			);
 			
@@ -34,10 +40,14 @@ public class UE5ShaderUtils : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"Core",
 				"CoreUObject",
 				"Engine",
+				"RHI",
+				"Projects",
+				"RenderCore",
 				"Slate",
-				"SlateCore",
+				"SlateCore"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
