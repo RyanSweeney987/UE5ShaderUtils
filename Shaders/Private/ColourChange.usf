@@ -10,6 +10,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #include "/Engine/Public/Platform.ush"
 
+#ifndef THREADS
+#define THREADS 8
+#endif
+
 Texture2D<float4> InputTexture;
 
 RWTexture2D<float4> OutputTexture;
@@ -20,7 +24,7 @@ float4 ColourChangePS(float4 SvPosition : SV_POSITION) : SV_Target0
 	return InputColour.zyxw;
 }
 
-[numthreads(8, 8, 1)]
+[numthreads(THREADS, THREADS, 1)]
 void ColourChangeCS(uint2 DispatchThreadId : SV_DispatchThreadID)
 {
 	const float4 InputColour = InputTexture.Load(int3(DispatchThreadId.xy, 0));

@@ -24,12 +24,14 @@ class FComputeColourChangeCS : public FGlobalShader
 	using FParameters = FComputeColourChangeParameters;
 	SHADER_USE_PARAMETER_STRUCT(FComputeColourChangeCS, FGlobalShader);
 	
-	class FThreads : SHADER_PERMUTATION_INT("THREADS", 32);
+	class FThreads : SHADER_PERMUTATION_RANGE_INT("THREADS", 1, 32);
 	using FPermutationDomain = TShaderPermutationDomain<FThreads>;
 	
 	static void ModifyCompilationEnvironment(const FGlobalShaderPermutationParameters& Parameters, FShaderCompilerEnvironment& OutEnvironment)
 	{
 		OutEnvironment.CompilerFlags.Add(ECompilerFlags::CFLAG_AllowTypedUAVLoads);
+		
+		// OutEnvironment.SetDefine(TEXT("THREADS"), 8);
 	}
 };
 
