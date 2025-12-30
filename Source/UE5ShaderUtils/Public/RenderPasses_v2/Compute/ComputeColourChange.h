@@ -11,13 +11,29 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ShaderParameterStruct.h"
 
-/**
- * 
- */
-class UE5SHADERUTILS_API ComputeColourChange
-{
-public:
-	ComputeColourChange();
-	~ComputeColourChange();
+BEGIN_SHADER_PARAMETER_STRUCT(FComputeColourChangeParameters,)
+	SHADER_PARAMETER_RDG_TEXTURE(Texture2D<float4>, InputTexture)
+	SHADER_PARAMETER_RDG_TEXTURE_UAV(RWTexture2D<float4>, OutputTexture)
+END_SHADER_PARAMETER_STRUCT()
+
+class FComputeColourChangeCS : public FGlobalShader
+{	
+	DECLARE_EXPORTED_SHADER_TYPE(FComputeColourChangeCS, Global, );
+	using FParameters = FComputeColourChangeParameters;
+	SHADER_USE_PARAMETER_STRUCT(FComputeColourChangeCS, FGlobalShader);
+	
+	class FThreads : SHADER_PERMUTATION_INT("THREADS", 32);
+	using FPermutationDomain = TShaderPermutationDomain<FThreads>;
+	
+	static void ModifyCompilationEnvironment(const FGlobalShaderPermutationParameters& Parameters, FShaderCompilerEnvironment& OutEnvironment)
+	{
+		OutEnvironment.CompilerFlags.Add(ECompilerFlags::CFLAG_AllowTypedUAVLoads);
+	}
 };
+
+namespace ShaderPasses::Compute::ColourChange
+{
+	void AddPass(FRDGBuilder& GraphBuilder, const FGlobalShaderMap* GlobalShaderMap, const FRDGTextureRef InputTexture, FRDGTextureRef& OutputTexture);
+}

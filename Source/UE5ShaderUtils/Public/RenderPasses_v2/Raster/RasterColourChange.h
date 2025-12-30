@@ -11,13 +11,22 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ShaderParameterStruct.h"
 
-/**
- * 
- */
-class UE5SHADERUTILS_API RasterColourChange
-{
-public:
-	RasterColourChange();
-	~RasterColourChange();
+BEGIN_SHADER_PARAMETER_STRUCT(FRasterColourChangeParameters,)
+	SHADER_PARAMETER_RDG_TEXTURE(Texture2D<float4>, InputTexture)
+
+	RENDER_TARGET_BINDING_SLOTS()
+END_SHADER_PARAMETER_STRUCT()
+
+class FRasterColourChangePS : public FGlobalShader
+{	
+	DECLARE_EXPORTED_SHADER_TYPE(FRasterColourChangePS, Global, );
+	using FParameters = FRasterColourChangeParameters;
+	SHADER_USE_PARAMETER_STRUCT(FRasterColourChangePS, FGlobalShader);
 };
+
+namespace ShaderPasses::Raster::ColourChange
+{
+	void AddPass(FRDGBuilder& GraphBuilder, const FGlobalShaderMap* GlobalShaderMap, const FRDGTextureRef InputTexture, FRDGTextureRef& OutputTexture);
+}

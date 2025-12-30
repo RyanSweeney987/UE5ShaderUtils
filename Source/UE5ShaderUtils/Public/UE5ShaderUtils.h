@@ -11,12 +11,30 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ExampleSceneViewExtension.h"
 #include "Modules/ModuleManager.h"
+#include "UE5ShaderUtils.generated.h"
+
+/**
+ * Example rendering subsystem that adds a scene view extension
+ * SceneViewExtension is made here as it needs a valid GRender pointer to register with
+ * which doesn't exist with when the module is loaded
+ */
+UCLASS(meta=(DisplayName="Example Rendering Subsystem"))
+class UExampleRenderingSubsystem : public UEngineSubsystem
+{
+	GENERATED_BODY()
+	
+	TSharedPtr<FExampleSceneViewExtension, ESPMode::ThreadSafe> ExampleSceneViewExtension;
+	
+public:
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
+};
 
 class FUE5ShaderUtilsModule : public IModuleInterface
 {
 public:
-
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;

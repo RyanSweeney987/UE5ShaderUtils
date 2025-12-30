@@ -11,11 +11,31 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #include "RenderPasses_v2/Raster/RasterColourChange.h"
 
+#include "RenderPasses_v2/ShaderPass.h"
 
-RasterColourChange::RasterColourChange()
-{
-}
+#define COLOUR_CHANGE TEXT("/ExampleShadersVirtualLocation/Private/ColourChange.usf")
 
-RasterColourChange::~RasterColourChange()
+IMPLEMENT_SHADER_TYPE(, FRasterColourChangePS, COLOUR_CHANGE, TEXT("ColourChangePS"), SF_Pixel);
+
+#undef COLOUR_CHANGE
+
+namespace ShaderPasses::Raster::ColourChange
 {
+	/**
+	 * For simple colour changes
+	 * @param GraphBuilder 
+	 * @param GlobalShaderMap 
+	 * @param InputTexture 
+	 * @param OutputTexture
+	 */
+	void AddPass(FRDGBuilder& GraphBuilder, const FGlobalShaderMap* GlobalShaderMap, const FRDGTextureRef InputTexture, FRDGTextureRef& OutputTexture)
+	{
+		FRasterColourChangeParameters* Parameters = GraphBuilder.AllocParameters<FRasterColourChangeParameters>();
+		Parameters->InputTexture = InputTexture;
+		Parameters->RenderTargets[0] = FRenderTargetBinding(OutputTexture, ERenderTargetLoadAction::ENoAction);
+
+		FShaderPass(GraphBuilder, GlobalShaderMap)
+		.SetNeverCull(true)
+		.AddRenderPass<FRasterColourChangePS>(InputTexture->Desc.Extent, FRDGEventName(TEXT("Raster Colour Change Pass")), Parameters);
+	}
 }

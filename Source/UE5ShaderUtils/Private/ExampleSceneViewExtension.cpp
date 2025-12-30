@@ -11,6 +11,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #include "ExampleSceneViewExtension.h"
 
+#include "RenderPasses_v2/Raster/RasterColourChange.h"
+#include "PostProcess/PostProcessing.h"
+#include "RenderPasses_v2/Compute/ComputeColourChange.h"
+#include "Runtime/Launch/Resources/Version.h"
+
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 3
+#include "PostProcess/PostProcessMaterialInputs.h"
+#else
+#include "PostProcess/PostProcessMaterial.h"
+#endif
 
 FExampleSceneViewExtension::FExampleSceneViewExtension(const FAutoRegister& AutoRegister) 
 	: FSceneViewExtensionBase(AutoRegister)
@@ -26,4 +36,21 @@ void FExampleSceneViewExtension::PrePostProcessPass_RenderThread(FRDGBuilder& Gr
 	const FPostProcessingInputs& Inputs)
 {
 	FSceneViewExtensionBase::PrePostProcessPass_RenderThread(GraphBuilder, InView, Inputs);
+		
+	checkSlow(InView.bIsViewInfo);
+	
+	FGlobalShaderMap* GlobalShaderMap = GetGlobalShaderMap(GMaxRHIFeatureLevel);
+	
+	const FRDGTextureRef SceneColorTexture = (*Inputs.SceneTextures)->SceneColorTexture;
+		
+	// Create output texture based on input texture description
+	// This doesn't save the output anywhere, just for demonstration purposes
+	// In a real scenario, you would want to output to the scene color or another render target
+	// You might choose to create the output texture in the passes themselves and output the result, return the texture etc
+	FRDGTextureRef OutputTexture = GraphBuilder.CreateTexture(
+		SceneColorTexture->Desc,
+		TEXT("ExampleSceneViewExtension_OutputTexture"));
+	
+	ShaderPasses::Raster::ColourChange::AddPass(GraphBuilder, GlobalShaderMap, SceneColorTexture, OutputTexture);
+	ShaderPasses::Compute::ColourChange::AddPass(GraphBuilder, GlobalShaderMap, SceneColorTexture, OutputTexture);
 }

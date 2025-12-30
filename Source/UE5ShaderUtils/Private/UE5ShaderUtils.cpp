@@ -16,14 +16,27 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #define LOCTEXT_NAMESPACE "FUE5ShaderUtilsModule"
 
+void UExampleRenderingSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+	
+	ExampleSceneViewExtension = FSceneViewExtensions::NewExtension<FExampleSceneViewExtension>();
+}
+
+void UExampleRenderingSubsystem::Deinitialize()
+{
+	Super::Deinitialize();
+}
+
 void FUE5ShaderUtilsModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
 	const FString PluginShaderDir = FPaths::Combine(IPluginManager::Get().FindPlugin(TEXT("UE5ShaderUtils"))->GetBaseDir(), TEXT("Shaders"));
-	if(!AllShaderSourceDirectoryMappings().Contains(TEXT("/ShadersVirtualLocation")))
+	if(!AllShaderSourceDirectoryMappings().Contains(TEXT("/ExampleShadersVirtualLocation")))
 	{
-		AddShaderSourceDirectoryMapping(TEXT("/ShadersVirtualLocation"), PluginShaderDir);
+		AddShaderSourceDirectoryMapping(TEXT("/ExampleShadersVirtualLocation"), PluginShaderDir);
 	}
+	
 }
 
 void FUE5ShaderUtilsModule::ShutdownModule()

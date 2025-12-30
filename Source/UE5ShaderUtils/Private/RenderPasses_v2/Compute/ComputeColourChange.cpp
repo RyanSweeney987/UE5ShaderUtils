@@ -11,11 +11,43 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #include "RenderPasses_v2/Compute/ComputeColourChange.h"
 
+#include "RenderGraphUtils.h"
+#include "RenderPasses_v2/ShaderPass.h"
 
-ComputeColourChange::ComputeColourChange()
-{
-}
+#define COLOUR_CHANGE TEXT("/ExampleShadersVirtualLocation/Private/ColourChange.usf")
 
-ComputeColourChange::~ComputeColourChange()
+IMPLEMENT_SHADER_TYPE(, FComputeColourChangeCS, COLOUR_CHANGE, TEXT("ColourChangeCS"), SF_Compute);
+
+#undef COLOUR_CHANGE
+
+namespace ShaderPasses::Compute::ColourChange
 {
+	/**
+	 * For simple colour changes
+	 * @param GraphBuilder 
+	 * @param GlobalShaderMap 
+	 * @param InputTexture 
+	 * @oaram OutputTexture
+	 */
+	void AddPass(FRDGBuilder& GraphBuilder, const FGlobalShaderMap* GlobalShaderMap, const FRDGTextureRef InputTexture, FRDGTextureRef& OutputTexture)
+	{
+		constexpr int32 Threads = 8;
+		const FIntPoint ThreadCount = InputTexture->Desc.Extent;
+		const FIntVector GroupSize = FComputeShaderUtils::GetGroupCount(ThreadCount, FIntPoint(Threads, Threads));
+
+		FComputeColourChangeParameters* Parameters = GraphBuilder.AllocParameters<FComputeColourChangeParameters>();
+		Parameters->InputTexture = InputTexture;
+		Parameters->OutputTexture = GraphBuilder.CreateUAV(OutputTexture, ERDGUnorderedAccessViewFlags::None, OutputTexture->Desc.Format);
+
+		FComputeColourChangeCS::FPermutationDomain PermutationVector;
+		PermutationVector.Set<FComputeColourChangeCS::FThreads>(Threads);
+		
+		FShaderPass(GraphBuilder, GlobalShaderMap)
+		.SetNeverCull(true)
+		.AddComputePass<FComputeColourChangeCS>(
+			GroupSize, 
+			FRDGEventName(TEXT("Compute Colour Change Pass")), 
+			Parameters,
+			PermutationVector);
+	}
 }
