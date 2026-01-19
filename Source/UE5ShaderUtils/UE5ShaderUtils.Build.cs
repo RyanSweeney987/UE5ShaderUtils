@@ -16,22 +16,22 @@ public class UE5ShaderUtils : ModuleRules
 	public UE5ShaderUtils(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		
-		PublicIncludePaths.AddRange(
-			new string[] {
-				// ... add public include paths required here ...
-				// ... add public include paths required here ...
-				Path.Combine(GetModuleDirectory("Renderer"), "Private"),
-			}
-			);
-				
-		
-		PrivateIncludePaths.AddRange(
-			new string[] {
+
+		PublicIncludePaths.AddRange(new string[] {
+			// ... add public include paths required here ...
+			Path.Combine(GetModuleDirectory("Renderer"), "Private"),
+		});
+
+		PrivateIncludePaths.AddRange(new string[] {
 				// ... add other private include paths required here ...
-			}
-			);
-			
+		});
+						
+		if(Target.Version is { MajorVersion: 5, MinorVersion: > 5 })
+		{
+			PrivateIncludePaths.AddRange(new string[] {
+				Path.Combine(GetModuleDirectory("Renderer"), "Internal"),
+			});
+		}			
 		
 		PublicDependencyModuleNames.AddRange(
 			new string[]
